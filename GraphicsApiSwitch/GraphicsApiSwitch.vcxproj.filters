@@ -27,12 +27,24 @@
     <ClInclude Include="CommonUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InputHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderApiManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsApiSwitch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CommonUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderApiManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

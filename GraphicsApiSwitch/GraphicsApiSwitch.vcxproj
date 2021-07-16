@@ -154,11 +154,15 @@
     <ClInclude Include="CommonUtils.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GraphicsApiSwitch.h" />
+    <ClInclude Include="InputHandler.h" />
+    <ClInclude Include="RenderApiManager.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CommonUtils.cpp" />
     <ClCompile Include="GraphicsApiSwitch.cpp" />
+    <ClCompile Include="InputHandler.cpp" />
+    <ClCompile Include="RenderApiManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

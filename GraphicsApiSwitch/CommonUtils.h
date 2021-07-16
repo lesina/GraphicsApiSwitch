@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <string>
 #include <cassert>
+#include <queue>
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define ASSERT_NOT_IMPLEMENTED do { assert(0 && "Not implemented"); } while(false)

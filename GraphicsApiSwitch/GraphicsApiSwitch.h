@@ -6,6 +6,8 @@
 #endif
 
 #include "CommonUtils.h"
+#include "InputHandler.h"
+#include "RenderApiManager.h"
 
 class GraphicsApiSwitchApp
 {
@@ -27,6 +29,8 @@ public:
 	bool Initialize();
 
 	static GraphicsApiSwitchApp* GetApp();
+	static InputHandler* GetInputHandler();
+	static RenderApiManager* GetRenderApiManager();
 
 	HINSTANCE AppInst() const;
 	HWND      MainWnd() const;
@@ -44,18 +48,20 @@ private:
 	void Update();
 	void Draw();
 
-	void OnKeyboardInput();
-
 	bool InitMainWindow();
+	void InitRender();
+
+	void ProcessInputCommands();
 
 	static GraphicsApiSwitchApp* m_App;
+	static InputHandler* m_pInputHandler;
+	static RenderApiManager* m_pRenderApiManager;
 
 	HINSTANCE m_hAppInst;
 	HWND m_hMainWnd;
 
 	int m_nClientWidth;
 	int m_nClientHeight;
-
 	const int m_nMinClientWidth;
 	const int m_nMinClientHeight;
 

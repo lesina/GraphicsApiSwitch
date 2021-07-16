@@ -19,9 +19,9 @@ MainWndProc(
 
 int APIENTRY wWinMain(
 	_In_ HINSTANCE hInstance,
-    _In_opt_ HINSTANCE hPrevInstance,
-    _In_ LPWSTR lpCmdLine,
-    _In_ int nCmdShow
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPWSTR lpCmdLine,
+	_In_ int nCmdShow
 )
 {
 	// Enable run-time memory check for debug builds.
@@ -46,9 +46,22 @@ int APIENTRY wWinMain(
 
 
 GraphicsApiSwitchApp* GraphicsApiSwitchApp::m_App = nullptr;
+InputHandler* GraphicsApiSwitchApp::m_pInputHandler = nullptr;
+RenderApiManager* GraphicsApiSwitchApp::m_pRenderApiManager = nullptr;
+
 GraphicsApiSwitchApp* GraphicsApiSwitchApp::GetApp()
 {
 	return m_App;
+}
+
+InputHandler* GraphicsApiSwitchApp::GetInputHandler()
+{
+	return m_pInputHandler;
+}
+
+RenderApiManager* GraphicsApiSwitchApp::GetRenderApiManager()
+{
+	return m_pRenderApiManager;
 }
 
 HINSTANCE GraphicsApiSwitchApp::AppInst()const
@@ -63,19 +76,24 @@ HWND GraphicsApiSwitchApp::MainWnd()const
 
 GraphicsApiSwitchApp::GraphicsApiSwitchApp(
 	HINSTANCE hInstance
-) :	m_hAppInst(hInstance),
-	m_hMainWnd(nullptr),
-	m_nClientHeight(600),
-	m_nClientWidth(800),
-	m_nMinClientWidth(200),
-	m_nMinClientHeight(200),
-	m_szTitle(L"GraphicsApiSwitch"),
-	m_szWindowClass(L"GraphicsApiSwitch"),
-	m_bAppPaused(false)
+) : m_hAppInst(hInstance),
+m_hMainWnd(nullptr),
+m_nClientHeight(600),
+m_nClientWidth(800),
+m_nMinClientWidth(200),
+m_nMinClientHeight(200),
+m_szTitle(L"GraphicsApiSwitch"),
+m_szWindowClass(L"GraphicsApiSwitch"),
+m_bAppPaused(false)
 {
-	// Only one GraphicsApiSwitchApp can be constructed.
 	assert(m_App == nullptr);
 	m_App = this;
+
+	assert(m_pInputHandler == nullptr);
+	m_pInputHandler = InputHandler::GetInstance();
+
+	assert(m_pRenderApiManager == nullptr);
+	m_pRenderApiManager = RenderApiManager::GetInstance();
 }
 
 GraphicsApiSwitchApp::~GraphicsApiSwitchApp()
@@ -86,6 +104,8 @@ bool GraphicsApiSwitchApp::Initialize()
 {
 	if (!InitMainWindow())
 		return false;
+	
+	InitRender();
 
 	return true;
 }
@@ -223,15 +243,35 @@ int GraphicsApiSwitchApp::Run()
 
 void GraphicsApiSwitchApp::Update()
 {
-	ASSERT_NOT_IMPLEMENTED;
+	m_pInputHandler->ProcessInput();
+	ProcessInputCommands();
 }
 
 void GraphicsApiSwitchApp::Draw()
 {
-	ASSERT_NOT_IMPLEMENTED;
+	m_pRenderApiManager->Process();
 }
 
-void GraphicsApiSwitchApp::OnKeyboardInput()
+void GraphicsApiSwitchApp::ProcessInputCommands()
 {
-	ASSERT_NOT_IMPLEMENTED;
+	eCommand command;
+	while (m_pInputHandler->GetInputCommand(command))
+	{
+		switch (command)
+		{
+		case(eCommand::ec_PrevRenderApi):
+			m_pRenderApiManager->SwitchRenderAPIPrev();
+			break;
+		case(eCommand::ec_NextRenderApi):
+			m_pRenderApiManager->SwitchRenderAPINext();
+			break;
+		default:
+			ASSERT_NOT_IMPLEMENTED;
+		}
+	}
+}
+
+void GraphicsApiSwitchApp::InitRender()
+{
+	m_pRenderApiManager->InitRender();
 }
