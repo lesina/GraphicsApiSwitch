@@ -1,6 +1,10 @@
 // GraphicsApiSwitch.cpp : Defines the entry point for the application.
 //
 
+#include <Windowsx.h>
+#include <cstdlib>
+#include <ctime>
+
 #include "framework.h"
 #include "GraphicsApiSwitch.h"
 
@@ -76,15 +80,16 @@ HWND GraphicsApiSwitchApp::MainWnd()const
 
 GraphicsApiSwitchApp::GraphicsApiSwitchApp(
 	HINSTANCE hInstance
-) : m_hAppInst(hInstance),
-m_hMainWnd(nullptr),
-m_nClientHeight(600),
-m_nClientWidth(800),
-m_nMinClientWidth(200),
-m_nMinClientHeight(200),
-m_szTitle(L"GraphicsApiSwitch"),
-m_szWindowClass(L"GraphicsApiSwitch"),
-m_bAppPaused(false)
+) :
+	m_hAppInst(hInstance),
+	m_hMainWnd(nullptr),
+	m_nClientHeight(600),
+	m_nClientWidth(800),
+	m_nMinClientWidth(200),
+	m_nMinClientHeight(200),
+	m_szTitle(L"GraphicsApiSwitch"),
+	m_szWindowClass(L"GraphicsApiSwitch"),
+	m_bAppPaused(false)
 {
 	assert(m_App == nullptr);
 	m_App = this;
@@ -94,6 +99,8 @@ m_bAppPaused(false)
 
 	assert(m_pRenderApiManager == nullptr);
 	m_pRenderApiManager = RenderApiManager::GetInstance();
+
+	m_Boxes = new std::vector<Box>();
 }
 
 GraphicsApiSwitchApp::~GraphicsApiSwitchApp()
@@ -102,9 +109,13 @@ GraphicsApiSwitchApp::~GraphicsApiSwitchApp()
 
 bool GraphicsApiSwitchApp::Initialize()
 {
+	Box box;
+	m_Boxes->push_back(box);
+	std::srand(std::time(nullptr));
+
 	if (!InitMainWindow())
 		return false;
-	
+
 	InitRender();
 
 	return true;
@@ -177,6 +188,7 @@ LRESULT GraphicsApiSwitchApp::MsgProc(
 	case WM_SIZE:
 		m_nClientWidth = LOWORD(lParam);
 		m_nClientHeight = HIWORD(lParam);
+		m_pRenderApiManager->OnResize(m_nClientWidth, m_nClientHeight);
 		return 0;
 
 		// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
@@ -194,10 +206,27 @@ LRESULT GraphicsApiSwitchApp::MsgProc(
 		PostQuitMessage(0);
 		return 0;
 
+	case WM_MENUCHAR:
+		return MAKELRESULT(0, MNC_CLOSE);
+
 		// Catch this message so to prevent the window from becoming too small.
 	case WM_GETMINMAXINFO:
 		((MINMAXINFO*)lParam)->ptMinTrackSize.x = m_nMinClientWidth;
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = m_nMinClientHeight;
+		return 0;
+
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+	case WM_LBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONUP:
+		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+	case WM_MOUSEMOVE:
+		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 
 	case WM_KEYUP:
@@ -249,7 +278,7 @@ void GraphicsApiSwitchApp::Update()
 
 void GraphicsApiSwitchApp::Draw()
 {
-	m_pRenderApiManager->Process();
+	m_pRenderApiManager->Process(m_Boxes);
 }
 
 void GraphicsApiSwitchApp::ProcessInputCommands()
@@ -265,6 +294,26 @@ void GraphicsApiSwitchApp::ProcessInputCommands()
 		case(eCommand::ec_NextRenderApi):
 			m_pRenderApiManager->SwitchRenderAPINext();
 			break;
+		case(eCommand::ec_AddBox):
+		{
+			Box newBox;
+			int nBoxArraySize = m_Boxes->size();
+			if (nBoxArraySize)
+			{
+				static int nBorder = 50;
+				int x = std::rand();
+				int z = std::rand();
+				newBox.SetPosition(x % nBorder, 0.0f, z % nBorder);
+			}
+			
+			if (nBoxArraySize < BOX_LIMIT_COUNT)
+				m_Boxes->push_back(newBox);
+			break;
+		}
+		case(eCommand::ec_RemoveBox):
+			if (m_Boxes->size())
+				m_Boxes->pop_back();
+			break;
 		default:
 			ASSERT_NOT_IMPLEMENTED;
 		}
@@ -273,5 +322,51 @@ void GraphicsApiSwitchApp::ProcessInputCommands()
 
 void GraphicsApiSwitchApp::InitRender()
 {
-	m_pRenderApiManager->InitRender();
+	m_pRenderApiManager->InitRender(m_hMainWnd, m_nClientWidth, m_nClientHeight);
+}
+
+void GraphicsApiSwitchApp::OnMouseMove(
+	WPARAM btnState,
+	int x,
+	int y
+)
+{
+	if ((btnState & MK_LBUTTON) != 0)
+	{
+		float dx = DirectX::XMConvertToRadians(0.25f*static_cast<float>(x - m_LastMousePos.x));
+		float dy = DirectX::XMConvertToRadians(0.25f*static_cast<float>(y - m_LastMousePos.y));
+
+		m_pRenderApiManager->UpdateCamera(0.0f, dx, dy);
+	}
+	else if ((btnState & MK_RBUTTON) != 0)
+	{
+		float dx = 0.005f*static_cast<float>(x - m_LastMousePos.x);
+		float dy = 0.005f*static_cast<float>(y - m_LastMousePos.y);
+
+		m_pRenderApiManager->UpdateCamera(dx - dy, 0.0f, 0.0f);
+	}
+
+	m_LastMousePos.x = x;
+	m_LastMousePos.y = y;
+}
+
+void GraphicsApiSwitchApp::OnMouseDown(
+	WPARAM btnState,
+	int x,
+	int y
+)
+{
+	m_LastMousePos.x = x;
+	m_LastMousePos.y = y;
+
+	SetCapture(m_hMainWnd);
+}
+
+void GraphicsApiSwitchApp::OnMouseUp(
+	WPARAM btnState,
+	int x,
+	int y
+)
+{
+	ReleaseCapture();
 }

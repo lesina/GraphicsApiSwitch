@@ -5,9 +5,10 @@
 #include <crtdbg.h>
 #endif
 
+#include "Box.h"
 #include "CommonUtils.h"
 #include "InputHandler.h"
-#include "RenderApiManager.h"
+#include "Render/RenderApiManager.h"
 
 class GraphicsApiSwitchApp
 {
@@ -53,6 +54,22 @@ private:
 
 	void ProcessInputCommands();
 
+	void OnMouseMove(
+		WPARAM btnState,
+		int x,
+		int y
+	);
+	void OnMouseDown(
+		WPARAM btnState,
+		int x,
+		int y
+	);
+	void OnMouseUp(
+		WPARAM btnState,
+		int x,
+		int y
+	);
+
 	static GraphicsApiSwitchApp* m_App;
 	static InputHandler* m_pInputHandler;
 	static RenderApiManager* m_pRenderApiManager;
@@ -69,4 +86,8 @@ private:
 	std::wstring m_szWindowClass;
 
 	bool m_bAppPaused;
+
+	POINT m_LastMousePos;
+
+	std::vector<Box>* m_Boxes;
 };

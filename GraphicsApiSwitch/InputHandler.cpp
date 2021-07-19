@@ -24,9 +24,27 @@ void InputHandler::OnKeyboardInput()
 	if (IsKeyDown(VK_RIGHT))
 		m_pCommandQueue->push(eCommand::ec_NextRenderApi);
 
-	/*if (IsKeyDown(VK_UP))
+	static bool isUpButtonPushed = false;
+	if (IsKeyDown(VK_UP) && !isUpButtonPushed)
+	{
+		m_pCommandQueue->push(eCommand::ec_AddBox);
+		isUpButtonPushed = true;
+	}
+	else if (!IsKeyDown(VK_UP))
+	{
+		isUpButtonPushed = false;
+	}
 
-	if (IsKeyDown(VK_DOWN))*/
+	static bool isDownButtonPushed = false;
+	if (IsKeyDown(VK_DOWN) && !isDownButtonPushed)
+	{
+		m_pCommandQueue->push(eCommand::ec_RemoveBox);
+		isDownButtonPushed = true;
+	}
+	else if (!IsKeyDown(VK_DOWN))
+	{
+		isDownButtonPushed = false;
+	}
 }
 
 bool InputHandler::IsKeyDown(

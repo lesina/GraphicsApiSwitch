@@ -6,6 +6,8 @@ enum eCommand
 {
 	ec_NextRenderApi = 0,
 	ec_PrevRenderApi,
+	ec_AddBox,
+	ec_RemoveBox,
 	
 	ec_CommandNumber,
 };

@@ -151,18 +151,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Box.h" />
     <ClInclude Include="CommonUtils.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GraphicsApiSwitch.h" />
     <ClInclude Include="InputHandler.h" />
-    <ClInclude Include="RenderApiManager.h" />
+    <ClInclude Include="Render\Camera.h" />
+    <ClInclude Include="Render\D3D12\D3D12RenderBackend.h" />
+    <ClInclude Include="Render\D3D12\d3dx12.h" />
+    <ClInclude Include="Render\D3D12\UploadBuffer.h" />
+    <ClInclude Include="Render\MathHelper.h" />
+    <ClInclude Include="Render\RenderApiManager.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Box.cpp" />
     <ClCompile Include="CommonUtils.cpp" />
     <ClCompile Include="GraphicsApiSwitch.cpp" />
     <ClCompile Include="InputHandler.cpp" />
-    <ClCompile Include="RenderApiManager.cpp" />
+    <ClCompile Include="Render\Camera.cpp" />
+    <ClCompile Include="Render\D3D12\D3D12RenderBackend.cpp" />
+    <ClCompile Include="Render\RenderApiManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
